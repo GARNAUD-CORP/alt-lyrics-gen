@@ -5,3 +5,4 @@ dist
 .vercel
 .claude/settings.local.json
 npm-debug.log*
+.env*

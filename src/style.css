@@ -122,29 +122,24 @@ html, body {
 .film-thumb:hover .del { opacity: 1; }
 .film-thumb.dragging { opacity: 0.4; }
 .film-thumb.dragover { border-color: #fff; }
-#film-actions { display: flex; align-items: center; gap: 8px; }
-#film-add {
-  background: #1c1c1c;
-  border: 1px solid var(--ui-border);
-  color: var(--ui-text);
-  padding: 7px 12px;
-  border-radius: 7px;
+
+/* "+ Phrase" placeholder thumbnail (last in the strip) */
+.film-add-thumb {
+  width: 148px;
+  height: 93px;
+  border: 2px dashed var(--ui-border);
+  background: #141414;
+  color: var(--ui-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   cursor: pointer;
-  font-size: 13px;
 }
-#film-add:hover { border-color: var(--ui-accent); }
-#film-export {
-  background: var(--ui-accent);
-  color: #000;
-  border: none;
-  padding: 7px 14px;
-  border-radius: 7px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-}
-#film-export:disabled { opacity: 0.5; cursor: default; }
-#film-status { font-size: 12px; color: var(--ui-accent); }
+.film-add-thumb:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
+.film-add-thumb .plus { font-size: 22px; line-height: 1; }
+.film-add-thumb .lbl { font-size: 12px; }
 
 #stage {
   position: relative;

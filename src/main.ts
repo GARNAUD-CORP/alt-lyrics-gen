@@ -298,17 +298,26 @@ async function renderFrame(text: string, w: number, h: number, transparent: bool
   }
 }
 
+/** Steps for the WHOLE timeline: each non-empty phrase broken down in order. */
+function buildAllSteps(mode: Mode, unit: Unit): string[] {
+  const out: string[] = [];
+  slides
+    .filter((s) => s.text.trim())
+    .forEach((s) => out.push(...buildSteps(s.text, mode, unit)));
+  return out;
+}
+
 async function exportSequence() {
   const preset = { w: 1080, h: Math.round((1080 * BOX_H) / BOX_W) }; // format brat 540:340
   const mode = ($("#e-mode") as HTMLSelectElement).value as Mode;
   const unit = ($("#e-unit") as HTMLSelectElement).value as Unit;
   const transparent = ($("#e-transparent") as HTMLInputElement).checked;
-  const steps = buildSteps(currentText, mode, unit);
+  const steps = buildAllSteps(mode, unit);
   const status = $("#export-status");
   const btn = $("#btn-export") as HTMLButtonElement;
 
   if (!steps.length) {
-    status.textContent = "Write some lyrics first.";
+    status.textContent = "Write some lyrics in the timeline first.";
     return;
   }
   btn.disabled = true;
@@ -350,7 +359,7 @@ async function exportSequence() {
 function previewSteps() {
   const mode = ($("#e-mode") as HTMLSelectElement).value as Mode;
   const unit = ($("#e-unit") as HTMLSelectElement).value as Unit;
-  const steps = buildSteps(currentText, mode, unit);
+  const steps = buildAllSteps(mode, unit);
   const wrap = $("#seq-preview");
   wrap.innerHTML = "";
   // Real mini-renders (same engine), in brat 5:3 format
@@ -373,8 +382,9 @@ function previewSteps() {
 function updateHint(count?: number) {
   const mode = ($("#e-mode") as HTMLSelectElement).value as Mode;
   const unit = ($("#e-unit") as HTMLSelectElement).value as Unit;
-  const n = count ?? buildSteps(currentText, mode, unit).length;
-  $("#export-hint").textContent = `${n} image(s) will be generated, numbered frame_001…`;
+  const n = count ?? buildAllSteps(mode, unit).length;
+  const phrases = slides.filter((s) => s.text.trim()).length;
+  $("#export-hint").textContent = `${n} image(s) will be generated from ${phrases} phrase(s), numbered frame_001…`;
 }
 
 // ---------- UI binding (Phase 3) ----------
@@ -726,20 +736,6 @@ const saveSlides = () => {
   }
 };
 
-function slug(text: string): string {
-  const s = text
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .split(" ")
-    .slice(0, 6)
-    .join("-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  return s || "phrase";
-}
-
 function selectSlide(i: number) {
   if (!slides.length) slides.push({ text: "" });
   activeSlide = Math.max(0, Math.min(i, slides.length - 1));
@@ -816,6 +812,14 @@ function renderFilm() {
       dragFrom = null;
     });
   });
+
+  // "+ Phrase" placeholder as the last thumbnail
+  const add = document.createElement("button");
+  add.className = "film-thumb film-add-thumb";
+  add.title = "Add a phrase";
+  add.innerHTML = `<span class="plus">＋</span><span class="lbl">Phrase</span>`;
+  add.addEventListener("click", addSlide);
+  list.appendChild(add);
 }
 
 /** Met à jour uniquement la vignette active (rapide, pour la frappe). */
@@ -826,49 +830,6 @@ function refreshActiveThumb() {
   const canvas = thumb.querySelector(".canvas") as HTMLElement;
   canvas.style.background = backgroundCss();
   layoutInto(canvas.querySelector("div") as HTMLElement, 148, 93, slides[activeSlide].text);
-}
-
-async function exportAllSlides() {
-  const status = $("#film-status");
-  const btn = $("#film-export") as HTMLButtonElement;
-  const list = slides.filter((s) => s.text.trim());
-  if (!list.length) {
-    status.textContent = "No phrases to export.";
-    return;
-  }
-  btn.disabled = true;
-  const overlay = document.createElement("div");
-  overlay.style.cssText =
-    "position:fixed;inset:0;background:#0e0e0e;z-index:2147483600;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;color:#8ace00;font:600 22px -apple-system,sans-serif;";
-  const label = document.createElement("div");
-  overlay.appendChild(label);
-  document.body.appendChild(overlay);
-  try {
-    const W = 1080;
-    const H = Math.round((1080 * BOX_H) / BOX_W);
-    const zip = new JSZip();
-    const pad = String(list.length).length;
-    for (let i = 0; i < list.length; i++) {
-      label.textContent = `Rendering ${i + 1}/${list.length}…`;
-      const url = await renderFrame(list[i].text, W, H, false);
-      zip.file(`${String(i + 1).padStart(pad, "0")}_${slug(list[i].text)}.png`, url.split(",")[1], {
-        base64: true,
-      });
-    }
-    label.textContent = "Compressing…";
-    const blob = await zip.generateAsync({ type: "blob" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `brat-lyrics_${list.length}-phrases.zip`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    status.textContent = `✓ ${list.length} images exported.`;
-  } catch (e) {
-    status.textContent = "Error: " + (e as Error).message;
-  } finally {
-    overlay.remove();
-    btn.disabled = false;
-  }
 }
 
 // ---------- Tabs ----------
@@ -916,10 +877,6 @@ $("#btn-tap").addEventListener("click", tap);
 $("#btn-tap-undo").addEventListener("click", undoTap);
 $("#btn-tap-reset").addEventListener("click", resetTaps);
 $("#btn-export-video").addEventListener("click", exportVideo);
-
-// --- Filmstrip ---
-$("#film-add").addEventListener("click", addSlide);
-$("#film-export").addEventListener("click", exportAllSlides);
 
 // Space = tap when Sync tab is active (outside text input)
 window.addEventListener("keydown", (e) => {

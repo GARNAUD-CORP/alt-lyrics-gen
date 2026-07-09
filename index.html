@@ -14,14 +14,9 @@
             <div id="lyrics"></div>
           </div>
         </div>
-        <!-- Filmstrip: one thumbnail = one phrase -->
+        <!-- Filmstrip: one thumbnail = one phrase (last thumb = add) -->
         <div id="filmstrip">
           <div id="film-list"></div>
-          <div id="film-actions">
-            <button id="film-add" title="Add a phrase">＋ Phrase</button>
-            <button id="film-export">Export all (.zip)</button>
-            <span id="film-status"></span>
-          </div>
         </div>
       </main>
 
@@ -40,7 +35,8 @@
         <div class="tabs">
           <button class="tab-btn active" data-tab="style">Style</button>
           <button class="tab-btn" data-tab="export">Sequence</button>
-          <button class="tab-btn" data-tab="sync">Video Sync</button>
+          <!-- Video Sync hidden for now -->
+          <button class="tab-btn" data-tab="sync" hidden>Video Sync</button>
         </div>
 
         <!-- Style Panel (Phase 3) -->
@@ -185,9 +181,10 @@
             </label>
           </div>
 
+          <p class="hint">Exports the whole timeline: each phrase is broken down with the settings above.</p>
           <p class="hint" id="export-hint"></p>
           <div class="export-actions">
-            <button id="btn-export">Export sequence (.zip)</button>
+            <button id="btn-export">Export timeline (.zip)</button>
             <button id="btn-preview-seq" class="ghost">Preview steps</button>
           </div>
           <div id="export-status"></div>

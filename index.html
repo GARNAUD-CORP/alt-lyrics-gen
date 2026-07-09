@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,25 +7,25 @@
   </head>
   <body>
     <div id="app">
-      <!-- Zone d'affichage (ce qui est exporté) -->
+      <!-- Display area (what gets exported) -->
       <main id="stage-wrap">
         <div id="stage-area">
           <div id="stage">
             <div id="lyrics"></div>
           </div>
         </div>
-        <!-- Pellicule : une vignette = une phrase -->
+        <!-- Filmstrip: one thumbnail = one phrase -->
         <div id="filmstrip">
           <div id="film-list"></div>
           <div id="film-actions">
-            <button id="film-add" title="Ajouter une phrase">＋ Phrase</button>
-            <button id="film-export">Exporter tout (.zip)</button>
+            <button id="film-add" title="Add a phrase">＋ Phrase</button>
+            <button id="film-export">Export all (.zip)</button>
             <span id="film-status"></span>
           </div>
         </div>
       </main>
 
-      <!-- Barre de contrôle -->
+      <!-- Control bar -->
       <section id="controls">
         <div class="input-row">
           <input
@@ -39,14 +39,14 @@
 
         <div class="tabs">
           <button class="tab-btn active" data-tab="style">Style</button>
-          <button class="tab-btn" data-tab="export">Séquence</button>
-          <button class="tab-btn" data-tab="sync">Sync vidéo</button>
+          <button class="tab-btn" data-tab="export">Sequence</button>
+          <button class="tab-btn" data-tab="sync">Video Sync</button>
         </div>
 
-        <!-- Panneau Style (Phase 3) -->
+        <!-- Style Panel (Phase 3) -->
         <div class="panel active" data-panel="style">
           <div class="grid">
-            <label>Police
+            <label>Font
               <select id="c-font">
                 <option value="arial_narrowregular, 'Arial Narrow', sans-serif">Arial Narrow (brat)</option>
                 <option value="Arial, Helvetica, sans-serif">Arial</option>
@@ -58,98 +58,98 @@
               </select>
             </label>
 
-            <label>Flou
+            <label>Blur
               <input id="c-blur" type="range" min="0" max="6" step="0.1" value="2" />
               <span class="val" id="v-blur"></span>
             </label>
 
-            <label>Graisse
+            <label>Weight
               <select id="c-weight">
-                <option value="300">Fin</option>
+                <option value="300">Light</option>
                 <option value="400">Normal</option>
                 <option value="500">Medium (brat)</option>
-                <option value="700">Gras</option>
-                <option value="900">Extra-gras</option>
+                <option value="700">Bold</option>
+                <option value="900">Extra Bold</option>
               </select>
             </label>
 
-            <label>Interlettrage
+            <label>Letter Spacing
               <input id="c-tracking" type="range" min="-0.08" max="0.3" step="0.005" value="0" />
               <span class="val" id="v-tracking"></span>
             </label>
 
-            <label>Interligne (0 = brat 1.0)
+            <label>Line Height (0 = brat 1.0)
               <input id="c-leading" type="range" min="0" max="1.6" step="0.01" value="0" />
               <span class="val" id="v-leading"></span>
             </label>
 
-            <label>Largeur bloc
+            <label>Block Width
               <input id="c-width" type="range" min="40" max="100" step="1" value="100" />
               <span class="val" id="v-width"></span>
             </label>
 
             <label class="checkbox">
               <input id="c-autofit" type="checkbox" checked />
-              Ajuster la taille auto
+              Auto-fit size
             </label>
 
-            <label>Taille max (auto) / fixe
+            <label>Max Size (auto) / Fixed
               <input id="c-size" type="range" min="20" max="320" step="1" value="170" />
               <span class="val" id="v-size"></span>
             </label>
 
             <label class="checkbox">
               <input id="c-lowercase" type="checkbox" checked />
-              Minuscules
+              Lowercase
             </label>
 
             <label class="checkbox">
               <input id="c-justify-last" type="checkbox" checked />
-              Justifier la dernière ligne
+              Justify last line
             </label>
 
-            <label>Texte
+            <label>Text
               <input id="c-color" type="color" value="#ffffff" />
             </label>
 
-            <label>Fond
+            <label>Background
               <input id="c-bg" type="color" value="#000000" />
             </label>
           </div>
 
-          <div class="section-title">Créatif</div>
+          <div class="section-title">Creative</div>
           <div class="grid">
-            <label>Type de fond
+            <label>Background Type
               <select id="c-bgtype">
-                <option value="solid">Uni</option>
-                <option value="gradient">Dégradé</option>
+                <option value="solid">Solid</option>
+                <option value="gradient">Gradient</option>
                 <option value="image">Image</option>
               </select>
             </label>
-            <label>Fond 2 (dégradé)
+            <label>Background 2 (gradient)
               <input id="c-bg2" type="color" value="#8ace00" />
             </label>
-            <label>Angle dégradé
+            <label>Gradient Angle
               <input id="c-bgangle" type="range" min="0" max="360" step="5" value="90" />
               <span class="val" id="v-bgangle"></span>
             </label>
-            <label class="file-row">Image de fond
+            <label class="file-row">Background Image
               <input id="c-bgimage" type="file" accept="image/*" />
             </label>
 
-            <label>Lueur (glow)
+            <label>Glow
               <input id="c-glow" type="range" min="0" max="40" step="1" value="0" />
               <span class="val" id="v-glow"></span>
             </label>
-            <label>Couleur lueur
+            <label>Glow Color
               <input id="c-glowcolor" type="color" value="#8ace00" />
             </label>
 
-            <label>Contour
+            <label>Outline
               <input id="c-outline" type="range" min="0" max="12" step="0.5" value="0" />
               <span class="val" id="v-outline"></span>
             </label>
-            <label>Couleur contour
+            <label>Outline Color
               <input id="c-outlinecolor" type="color" value="#000000" />
             </label>
 
@@ -158,85 +158,85 @@
               <span class="val" id="v-rotate"></span>
             </label>
           </div>
-          <button id="reset-style" class="ghost">Réinitialiser le style</button>
+          <button id="reset-style" class="ghost">Reset style</button>
         </div>
 
-        <!-- Panneau Export (Phase 2) -->
+        <!-- Export Panel (Phase 2) -->
         <div class="panel" data-panel="export">
           <div class="grid">
             <label>Mode
               <select id="e-mode">
-                <option value="cumulative">Cumulatif (+1 mot / image)</option>
-                <option value="word">Mot par mot (1 seul mot)</option>
-                <option value="line">Ligne par ligne</option>
+                <option value="cumulative">Cumulative (+1 word / image)</option>
+                <option value="word">Word by word (1 word only)</option>
+                <option value="line">Line by line</option>
               </select>
             </label>
 
-            <label>Unité
+            <label>Unit
               <select id="e-unit">
-                <option value="word">Par mot</option>
-                <option value="char">Par lettre</option>
+                <option value="word">By word</option>
+                <option value="char">By letter</option>
               </select>
             </label>
 
             <label class="checkbox">
               <input id="e-transparent" type="checkbox" />
-              Fond transparent (PNG)
+              Transparent background (PNG)
             </label>
           </div>
 
           <p class="hint" id="export-hint"></p>
           <div class="export-actions">
-            <button id="btn-export">Exporter la séquence (.zip)</button>
-            <button id="btn-preview-seq" class="ghost">Aperçu des étapes</button>
+            <button id="btn-export">Export sequence (.zip)</button>
+            <button id="btn-preview-seq" class="ghost">Preview steps</button>
           </div>
           <div id="export-status"></div>
           <div id="seq-preview"></div>
         </div>
 
-        <!-- Panneau Sync + export vidéo -->
+        <!-- Sync + video export Panel -->
         <div class="panel" data-panel="sync">
-          <label class="file-row">1 · Charge l'audio (mp3, wav…)
+          <label class="file-row">1 · Load audio (mp3, wav…)
             <input id="sync-audio-file" type="file" accept="audio/*" />
           </label>
           <audio id="sync-audio" controls></audio>
 
           <p class="hint">
-            2 · Lance l'audio et appuie sur <b>Espace</b> (ou « Tap ») quand chaque
-            <span id="sync-unit-label">mot</span> doit apparaître.
+            2 · Play the audio and press <b>Space</b> (or "Tap") when each
+            <span id="sync-unit-label">word</span> should appear.
           </p>
           <div class="grid">
-            <label>Découpage
+            <label>Splitting
               <select id="sync-granularity">
-                <option value="word">Mot par mot</option>
-                <option value="line">Ligne par ligne</option>
+                <option value="word">Word by word</option>
+                <option value="line">Line by line</option>
               </select>
             </label>
             <label class="checkbox">
               <input id="sync-countin" type="checkbox" />
-              Décompte 1 temps avant
+              Count-in 1 beat before
             </label>
           </div>
 
           <div class="tap-row">
             <button id="btn-tap">Tap ⎵</button>
-            <button id="btn-tap-undo" class="ghost">↩︎ Annuler</button>
+            <button id="btn-tap-undo" class="ghost">↩︎ Undo</button>
             <button id="btn-tap-reset" class="ghost">Reset</button>
           </div>
           <div id="tap-progress" class="hint"></div>
           <div id="tap-tokens"></div>
 
-          <p class="hint">3 · Exporte la vidéo synchronisée</p>
+          <p class="hint">3 · Export synced video</p>
           <div class="grid">
-            <label>Apparition
+            <label>Appearance
               <select id="v-anim">
-                <option value="blur">Flou + fondu (brat)</option>
-                <option value="fade">Fondu</option>
+                <option value="blur">Blur + fade (brat)</option>
+                <option value="fade">Fade</option>
                 <option value="pop">Pop (zoom)</option>
-                <option value="none">Cut net</option>
+                <option value="none">Cut</option>
               </select>
             </label>
-            <label>Résolution
+            <label>Resolution
               <select id="v-res">
                 <option value="1080">1080 × 680</option>
                 <option value="720">720 × 454</option>
@@ -245,16 +245,17 @@
             </label>
             <label class="checkbox">
               <input id="v-audio" type="checkbox" checked />
-              Inclure l'audio dans la vidéo
+              Include audio in video
             </label>
           </div>
-          <button id="btn-export-video">Exporter la vidéo (.webm)</button>
+          <button id="btn-export-video">Export video (.webm)</button>
           <div id="video-status"></div>
         </div>
 
         <p class="credit">
-          Basé sur le code de
+          Based on code from
           <a href="https://www.bratgenerator.com" target="_blank" rel="noopener noreferrer">bratgenerator.com</a>
+          · <a href="https://github.com/GARNAUD-CORP/alt-lyrics-gen" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>
       </section>
     </div>

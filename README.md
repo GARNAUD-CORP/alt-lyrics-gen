@@ -1,39 +1,33 @@
 # brat lyrics
 
-Générateur de typographie façon *brat* (mode fond blanc), pensé pour créer des visuels de paroles synchronisables en montage vidéo (TikTok, Reels…).
+A *brat*-style typography generator (white background mode) designed to create lyric visuals that can be synchronized in video editing (TikTok, Reels, etc.).
 
-## Lancer
+**Open source project** — [GitHub repository](https://github.com/GARNAUD-CORP/alt-lyrics-gen)
+
+## Getting Started
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm run build    # build de production dans dist/
+npm run build    # production build in dist/
 ```
 
-## Fonctionnalités
+## Features
 
-### Phase 1 — Affichage brat
-Zone d'aperçu carrée (ce qui est exporté) + champ de saisie. Le texte est en
-minuscules, justifié (dernière ligne comprise), légèrement flouté, et sa taille
-s'ajuste automatiquement pour remplir le cadre. À chaque lettre/mot, l'agencement
-se recompose — comme sur bratgenerator.com. Aucun mot n'est jamais coupé : la
-police rétrécit pour que le mot le plus long tienne dans la largeur.
+### Phase 1 — Brat Display
+Square preview area (what gets exported) + text input. Text is lowercase, justified (including last line), slightly blurred, and automatically sizes to fill the frame. The layout recomposes with each letter/word — just like bratgenerator.com. Words are never broken: the font shrinks so the longest word fits within the width.
 
-### Phase 2 — Export de séquence
-Onglet **Export séquence**. Génère automatiquement une suite d'images (`.zip`,
-numérotées `frame_001…`) prêtes à importer dans un logiciel de montage :
-- **Cumulatif** : +1 mot (ou +1 lettre) par image → effet karaoké / build-up.
-- **Mot par mot** : une image par mot isolé.
-- **Ligne par ligne** : cumul ligne à ligne (lignes détectées sur le rendu réel).
+### Phase 2 — Sequence Export
+**Export Sequence** tab. Automatically generates a sequence of images (`.zip`, numbered `frame_001…`) ready to import into editing software:
+- **Cumulative** : +1 word (or +1 letter) per image → karaoke/build-up effect.
+- **Word by word** : one image per isolated word.
+- **Line by line** : cumulative line-by-line (lines detected from actual render).
 - Formats : 1080×1920 (TikTok/Reels), 1080×1080, 1920×1080.
-- Option fond transparent (PNG à canal alpha).
+- Transparent background option (PNG with alpha channel).
 
-### Phase 3 — Personnalisation
-Onglet **Style** : police, flou, graisse, interlettrage, interligne, largeur du
-bloc, taille auto/fixe, minuscules, justification de la dernière ligne, couleur
-du texte et du fond. Les réglages sont mémorisés (localStorage).
+### Phase 3 — Customization
+**Style** tab: font, blur, weight, letter spacing, line height, block width, auto/fixed size, lowercase, last-line justification, text and background color. Settings are persisted (localStorage).
 
-## Pile technique
-Vite + TypeScript, `html-to-image` (rendu DOM → PNG, filtres CSS inclus),
-`jszip` (archive de la séquence). Tout tourne côté client, aucune dépendance
-réseau.
+## Tech Stack
+Vite + TypeScript, `html-to-image` (DOM render → PNG, CSS filters included),
+`jszip` (sequence archive). Everything runs client-side, no network dependencies.

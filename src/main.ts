@@ -2,41 +2,41 @@ import "./style.css";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 
-// ---------- État / réglages (Phase 3) ----------
+// ---------- State / settings (Phase 3) ----------
 interface Settings {
   font: string;
-  blur: number; // flou pour 100px de fonte
+  blur: number; // blur for 100px font
   weight: string;
   tracking: number; // em
   leading: number;
-  width: number; // % du stage
+  width: number; // % of stage
   autofit: boolean;
-  size: number; // px, si non-auto
+  size: number; // px, if not auto
   lowercase: boolean;
   justifyLast: boolean;
   color: string;
   bg: string;
-  // Créatif
+  // Creative
   bgType: "solid" | "gradient" | "image";
   bg2: string;
   bgAngle: number;
   bgImage: string; // data URL
-  glow: number; // px (réf. 540), 0 = off
+  glow: number; // px (ref. 540), 0 = off
   glowColor: string;
-  outline: number; // px (réf. 540), 0 = off
+  outline: number; // px (ref. 540), 0 = off
   outlineColor: string;
   rotate: number; // deg
 }
 
 const DEFAULTS: Settings = {
   font: "arial_narrowregular, 'Arial Narrow', sans-serif",
-  blur: 2, // px de flou pour une boîte de 500px (valeur exacte de brat)
+  blur: 2, // px of blur for a 500px box (exact brat value)
   weight: "500",
   tracking: 0,
-  leading: 0, // 0 = line-height "normal" (comme brat)
+  leading: 0, // 0 = line-height "normal" (like brat)
   width: 100,
   autofit: true,
-  size: 170, // taille max en mode auto (comme brat), ou taille fixe sinon
+  size: 170, // max size in auto mode (like brat), or fixed size otherwise
   lowercase: true,
   justifyLast: true,
   color: "#ffffff",
@@ -62,7 +62,7 @@ const load = (): Settings => {
 };
 let settings = load();
 const save = () => {
-  // ne pas persister l'image de fond (data URL potentiellement volumineuse)
+  // don't persist background image (potentially large data URL)
   const { bgImage, ...rest } = settings;
   void bgImage;
   try {
@@ -72,7 +72,7 @@ const save = () => {
   }
 };
 
-// ---------- Éléments ----------
+// ---------- Elements ----------
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 const stage = $("#stage") as HTMLDivElement;
 const lyrics = $("#lyrics") as HTMLDivElement;
@@ -80,24 +80,24 @@ const input = $("#text-input") as HTMLInputElement;
 
 let currentText = "";
 
-// ---------- Cœur du rendu (Phase 1) ----------
+// ---------- Render core (Phase 1) ----------
 /**
- * Place `text` dans `el` contenu dans une boîte `box`.
- * Reproduit le look brat : minuscules, justifié (dernière ligne incluse),
- * flou léger, et taille auto pour remplir la boîte.
+ * Place `text` in `el` contained in a `box`.
+ * Reproduces the brat look: lowercase, justified (including last line),
+ * slight blur, and auto size to fill the box.
  */
 function layoutInto(el: HTMLElement, boxW: number, boxH: number, text: string) {
-  // Tout est défini pour une boîte de référence de 500px (comme brat), puis
-  // mis à l'échelle -> aperçu et export (n'importe quelle résolution) identiques.
+  // Everything is defined for a 500px reference box (like brat), then
+  // scaled -> preview and export (any resolution) are identical.
   const containerW = Math.round((boxW * settings.width) / 100);
   const containerH = Math.round(boxH);
-  // Tout est calé sur la boîte de référence de brat (540×340, padding 20,
-  // zone de texte 500×300). scale = largeur boîte / 540.
+  // Everything is aligned to brat's reference box (540×340, padding 20,
+  // text area 500×300). scale = box width / 540.
   const scale = containerW / BOX_W;
   const pad = Math.round(20 * scale); // brat: padding 20
   const maxFont = Math.max(8, settings.size * scale); // brat minFontSize 8
 
-  // Conteneur (équivalent #textOverlay) : bloc normal + justify.
+  // Container (equivalent to #textOverlay): normal block + justify.
   el.style.boxSizing = "border-box";
   el.style.position = "relative";
   el.style.overflow = "hidden";
@@ -109,9 +109,9 @@ function layoutInto(el: HTMLElement, boxW: number, boxH: number, text: string) {
   (el.style as any).textAlignLast = last;
   (el.style as any).webkitTextAlignLast = last;
 
-  // Span interne inline-block EN FLUX NORMAL (exactement .textFitted de brat) :
-  // sa largeur = celle de la ligne la plus longue, et le justify étale les
-  // autres lignes sur cette largeur. Aucun mot n'est jamais coupé.
+  // Internal inline-block span IN NORMAL FLOW (exactly .textFitted from brat):
+  // its width = longest line, and justify spreads other lines to that width.
+  // No word is ever broken.
   let span = el.querySelector("span.fitted") as HTMLElement | null;
   if (!span) {
     span = document.createElement("span");
@@ -121,13 +121,13 @@ function layoutInto(el: HTMLElement, boxW: number, boxH: number, text: string) {
   }
   span.textContent = text || "";
   span.style.display = "inline-block";
-  // PAS de max-width : le span (inline-block) se limite naturellement à la
-  // largeur de contenu du conteneur, et un mot trop long déborde -> détecté
-  // par getBoundingClientRect dans fitFontSize (comme le vrai textFit).
+  // NO max-width: the span (inline-block) naturally limits to the container's
+  // content width, and an overly long word overflows -> detected by
+  // getBoundingClientRect in fitFontSize (like real textFit).
   span.style.fontFamily = settings.font;
   span.style.fontWeight = settings.weight;
   span.style.letterSpacing = `${settings.tracking}em`;
-  // 0 = line-height 1 (comme brat : `html body { line-height: 1 }`) ; sinon valeur
+  // 0 = line-height 1 (like brat: `html body { line-height: 1 }`); otherwise value
   span.style.lineHeight = settings.leading > 0 ? String(settings.leading) : "1";
   span.style.color = settings.color;
   span.style.textTransform = settings.lowercase ? "lowercase" : "none";
@@ -144,14 +144,14 @@ function layoutInto(el: HTMLElement, boxW: number, boxH: number, text: string) {
   }
   span.style.fontSize = `${fontSize}px`;
 
-  // brat aligne le texte EN HAUT de la boîte (textFit alignVert:false) :
-  // padding uniforme, aucun centrage vertical.
+  // brat aligns text AT THE TOP of the box (textFit alignVert:false):
+  // uniform padding, no vertical centering.
 
-  // Flou façon brat : 2px sur une boîte de 500px, mis à l'échelle
+  // Blur like brat: 2px on a 500px box, scaled
   const blurPx = settings.blur * scale;
   span.style.filter = blurPx > 0 ? `blur(${blurPx}px)` : "none";
 
-  // ---- Créatif (appliqué APRÈS la mesure pour ne pas fausser fitFontSize) ----
+  // ---- Creative (applied AFTER measurement to not skew fitFontSize) ----
   const glowPx = settings.glow * scale;
   span.style.textShadow = glowPx > 0
     ? `0 0 ${glowPx}px ${settings.glowColor}, 0 0 ${glowPx * 2}px ${settings.glowColor}`
@@ -162,7 +162,7 @@ function layoutInto(el: HTMLElement, boxW: number, boxH: number, text: string) {
   span.style.transformOrigin = "center";
 }
 
-/** Valeur CSS du fond selon le type (uni / dégradé / image). */
+/** CSS background value based on type (solid / gradient / image). */
 function backgroundCss(): string {
   if (settings.bgType === "gradient")
     return `linear-gradient(${settings.bgAngle}deg, ${settings.bg}, ${settings.bg2})`;
@@ -172,10 +172,10 @@ function backgroundCss(): string {
 }
 
 /**
- * Recherche dichotomique de la plus grande police (<= maxSize) où le span
- * tient dans la boîte EN LARGEUR ET EN HAUTEUR. Copie exacte de l'algo textFit :
- * comme le span est inline-block, scrollWidth = largeur de la ligne la plus
- * longue -> aucun mot n'est jamais coupé, et le justify s'appuie sur cette largeur.
+ * Binary search for the largest font (<= maxSize) where the span fits
+ * in the box IN WIDTH AND HEIGHT. Exact copy of textFit algorithm:
+ * since the span is inline-block, scrollWidth = longest line width
+ * -> no word is ever broken, and justify relies on this width.
  */
 function fitFontSize(span: HTMLElement, availW: number, availH: number, maxSize: number): number {
   let low = 8; // brat minFontSize
@@ -184,7 +184,7 @@ function fitFontSize(span: HTMLElement, availW: number, availH: number, maxSize:
   while (low <= high) {
     const mid = (low + high) >> 1;
     span.style.fontSize = `${mid}px`;
-    // brat mesure via getBoundingClientRect (largeur = ligne la plus longue)
+    // brat measures via getBoundingClientRect (width = longest line)
     const r = span.getBoundingClientRect();
     if (r.width <= availW && r.height <= availH) {
       size = mid;
@@ -197,8 +197,8 @@ function fitFontSize(span: HTMLElement, availW: number, availH: number, maxSize:
 }
 
 /**
- * Le #stage a le format EXACT de la boîte blanche de brat : zone de texte
- * 500×300 + padding 20 => boîte 540×340 (ratio 5:3-ish). Au plus grand tenant.
+ * The #stage has the EXACT format of brat's white box: text area
+ * 500×300 + padding 20 => box 540×340 (ratio 5:3-ish). At the largest fitting size.
  */
 const BOX_W = 540;
 const BOX_H = 340;
@@ -223,7 +223,7 @@ function render() {
   layoutInto(lyrics, stage.clientWidth, stage.clientHeight, currentText);
 }
 
-// ---------- Découpage en étapes (Phase 2) ----------
+// ---------- Step breakdown (Phase 2) ----------
 type Mode = "cumulative" | "word" | "line";
 type Unit = "word" | "char";
 
@@ -234,7 +234,7 @@ function buildSteps(text: string, mode: Mode, unit: Unit): string[] {
   if (mode === "line") return cumulativeLines(t);
 
   if (unit === "char") {
-    // une image par caractère visible ajouté (toujours cumulatif)
+    // one image per visible character added (always cumulative)
     const steps: string[] = [];
     for (let i = 0; i < t.length; i++) {
       if (t[i] === " ") continue;
@@ -244,12 +244,12 @@ function buildSteps(text: string, mode: Mode, unit: Unit): string[] {
   }
 
   const tokens = t.split(" ");
-  if (mode === "word") return tokens; // un mot isolé par image
-  // cumulatif : +1 mot par image
+  if (mode === "word") return tokens; // one isolated word per image
+  // cumulative: +1 word per image
   return tokens.map((_, i) => tokens.slice(0, i + 1).join(" "));
 }
 
-/** Détecte les lignes réelles du rendu complet et renvoie un cumul ligne par ligne. */
+/** Detects actual lines from complete render and returns line-by-line cumulative. */
 function cumulativeLines(text: string): string[] {
   const words = text.split(" ");
   const probe = document.createElement("div");
@@ -275,9 +275,9 @@ function cumulativeLines(text: string): string[] {
 
 // ---------- Export images (Phase 2) ----------
 async function renderFrame(text: string, w: number, h: number, transparent: boolean): Promise<string> {
-  // html-to-image ne capture pas un node hors écran (rendu vide) et applique
-  // tout transform:scale dans la sortie. On rend donc le node à sa taille
-  // réelle, à l'écran (0,0), masqué par l'overlay d'export.
+  // html-to-image doesn't capture an off-screen node (empty render) and applies
+  // all transform:scale in the output. So we render the node at its actual
+  // size, on screen (0,0), hidden by the export overlay.
   const node = document.createElement("div");
   node.style.cssText = `position:fixed;left:0;top:0;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:2147483000;`;
   node.style.background = transparent ? "transparent" : backgroundCss();
@@ -308,12 +308,12 @@ async function exportSequence() {
   const btn = $("#btn-export") as HTMLButtonElement;
 
   if (!steps.length) {
-    status.textContent = "Écris d'abord des paroles.";
+    status.textContent = "Write some lyrics first.";
     return;
   }
   btn.disabled = true;
 
-  // Overlay opaque pour masquer les frames rendus à l'écran pendant l'export
+  // Opaque overlay to hide frames rendered on screen during export
   const overlay = document.createElement("div");
   overlay.style.cssText =
     "position:fixed;inset:0;background:#0e0e0e;z-index:2147483600;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;color:#8ace00;font:600 22px -apple-system,sans-serif;";
@@ -325,22 +325,22 @@ async function exportSequence() {
     const zip = new JSZip();
     const pad = String(steps.length).length;
     for (let i = 0; i < steps.length; i++) {
-      label.textContent = `Rendu ${i + 1}/${steps.length}…`;
+      label.textContent = `Rendering ${i + 1}/${steps.length}…`;
       const dataUrl = await renderFrame(steps[i], preset.w, preset.h, transparent);
       zip.file(`frame_${String(i + 1).padStart(pad, "0")}.png`, dataUrl.split(",")[1], {
         base64: true,
       });
     }
-    label.textContent = "Compression…";
+    label.textContent = "Compressing…";
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `brat-lyrics_${steps.length}-frames.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
-    status.textContent = `✓ ${steps.length} images exportées.`;
+    status.textContent = `✓ ${steps.length} images exported.`;
   } catch (e) {
-    status.textContent = "Erreur d'export : " + (e as Error).message;
+    status.textContent = "Export error: " + (e as Error).message;
   } finally {
     overlay.remove();
     btn.disabled = false;
@@ -353,7 +353,7 @@ function previewSteps() {
   const steps = buildSteps(currentText, mode, unit);
   const wrap = $("#seq-preview");
   wrap.innerHTML = "";
-  // Vrais mini-rendus (même moteur), au format brat 5:3
+  // Real mini-renders (same engine), in brat 5:3 format
   const thumbW = 168;
   const thumbH = Math.round((thumbW * BOX_H) / BOX_W);
   steps.slice(0, 24).forEach((s) => {
@@ -374,10 +374,10 @@ function updateHint(count?: number) {
   const mode = ($("#e-mode") as HTMLSelectElement).value as Mode;
   const unit = ($("#e-unit") as HTMLSelectElement).value as Unit;
   const n = count ?? buildSteps(currentText, mode, unit).length;
-  $("#export-hint").textContent = `${n} image(s) seront générées, numérotées frame_001…`;
+  $("#export-hint").textContent = `${n} image(s) will be generated, numbered frame_001…`;
 }
 
-// ---------- Liaison UI (Phase 3) ----------
+// ---------- UI binding (Phase 3) ----------
 function bindControls() {
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => {
     settings[k] = v;
@@ -465,18 +465,18 @@ function syncValueLabels() {
   t("v-rotate", `${settings.rotate}°`);
 }
 
-// ---------- Sync (tap) + export vidéo ----------
+// ---------- Sync (tap) + video export ----------
 interface Token {
-  label: string; // ce qui s'affiche dans le chip
-  cum: string; // texte cumulé à afficher quand ce token apparaît
-  time: number | null; // instant (s) où il apparaît
+  label: string; // what's displayed in the chip
+  cum: string; // accumulated text to display when this token appears
+  time: number | null; // instant (s) when it appears
 }
 const audioEl = document.getElementById("sync-audio") as HTMLAudioElement;
 let tokens: Token[] = [];
-let tapIndex = 0; // prochain token à taper
-let mediaSource: MediaElementAudioSourceNode | null = null; // createMediaElementSource: 1 seule fois
+let tapIndex = 0; // next token to tap
+let mediaSource: MediaElementAudioSourceNode | null = null; // createMediaElementSource: 1 time only
 
-/** Découpe le texte courant en tokens (mots ou lignes) pour la synchro. */
+/** Splits current text into tokens (words or lines) for sync. */
 function buildTokens() {
   const gran = ($("#sync-granularity") as HTMLSelectElement).value;
   const t = currentText.trim().replace(/\s+/g, " ");
@@ -502,7 +502,7 @@ function buildTokens() {
   renderTokens();
 }
 
-/** Groupes de mots par ligne, détectés sur le rendu réel (comme cumulativeLines). */
+/** Groups of words per line, detected from actual render (like cumulativeLines). */
 function detectLineGroups(text: string): string[][] {
   const words = text.split(" ");
   const probe = document.createElement("div");
@@ -537,8 +537,8 @@ function renderTokens() {
     .join("");
   const done = tokens.filter((t) => t.time != null).length;
   $("#tap-progress").textContent = tokens.length
-    ? `${done}/${tokens.length} calés${tapIndex < tokens.length ? ` · prochain : « ${tokens[tapIndex].label} »` : " · terminé ✓"}`
-    : "Écris d'abord des paroles.";
+    ? `${done}/${tokens.length} synced${tapIndex < tokens.length ? ` · next: « ${tokens[tapIndex].label} »` : " · done ✓"}`
+    : "Write some lyrics first.";
 }
 
 function tap() {
@@ -560,7 +560,7 @@ function resetTaps() {
   renderTokens();
 }
 
-/** Rend un état (texte cumulé) en HTMLImageElement à la résolution voulue. */
+/** Renders a state (accumulated text) into HTMLImageElement at desired resolution. */
 async function renderStateImage(text: string, w: number, h: number): Promise<HTMLImageElement> {
   const url = await renderFrame(text, w, h, false);
   return await new Promise((res) => {
@@ -575,7 +575,7 @@ async function exportVideo() {
   const btn = $("#btn-export-video") as HTMLButtonElement;
   const timed = tokens.filter((t) => t.time != null);
   if (timed.length < 1) {
-    status.textContent = "Cale d'abord au moins un mot (Tap).";
+    status.textContent = "Sync at least one word first (Tap).";
     return;
   }
   btn.disabled = true;
@@ -586,11 +586,11 @@ async function exportVideo() {
     const anim = ($("#v-anim") as HTMLSelectElement).value;
     const withAudio = ($("#v-audio") as HTMLInputElement).checked && !!audioEl.src;
 
-    // Pré-rendu de chaque état
-    status.textContent = "Pré-rendu des images…";
+    // Pre-render each state
+    status.textContent = "Pre-rendering images…";
     const imgs: HTMLImageElement[] = [];
     for (let i = 0; i < tokens.length; i++) {
-      status.textContent = `Pré-rendu ${i + 1}/${tokens.length}…`;
+      status.textContent = `Pre-rendering ${i + 1}/${tokens.length}…`;
       imgs.push(await renderStateImage(tokens[i].cum, W, H));
     }
 
@@ -688,15 +688,15 @@ async function exportVideo() {
       const blob = new Blob(chunks, { type: "video/webm" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `brat-lyrics-video_${tokens.length}mots.webm`;
+      a.download = `brat-lyrics-video_${tokens.length}words.webm`;
       a.click();
       URL.revokeObjectURL(a.href);
       if (audioCtx) audioCtx.close();
-      status.textContent = `✓ Vidéo exportée (${Math.round(endTime)}s).`;
+      status.textContent = `✓ Video exported (${Math.round(endTime)}s).`;
       btn.disabled = false;
     };
 
-    status.textContent = "Enregistrement en temps réel…";
+    status.textContent = "Recording in real time…";
     if (withAudio) {
       audioEl.currentTime = 0;
       await audioEl.play().catch(() => {});
@@ -704,12 +704,12 @@ async function exportVideo() {
     rec.start();
     draw();
   } catch (e) {
-    status.textContent = "Erreur : " + (e as Error).message;
+    status.textContent = "Error: " + (e as Error).message;
     btn.disabled = false;
   }
 }
 
-// ---------- Pellicule (slides / phrases) ----------
+// ---------- Filmstrip (slides / phrases) ----------
 interface Slide {
   text: string;
 }
@@ -833,7 +833,7 @@ async function exportAllSlides() {
   const btn = $("#film-export") as HTMLButtonElement;
   const list = slides.filter((s) => s.text.trim());
   if (!list.length) {
-    status.textContent = "Aucune phrase à exporter.";
+    status.textContent = "No phrases to export.";
     return;
   }
   btn.disabled = true;
@@ -849,29 +849,29 @@ async function exportAllSlides() {
     const zip = new JSZip();
     const pad = String(list.length).length;
     for (let i = 0; i < list.length; i++) {
-      label.textContent = `Rendu ${i + 1}/${list.length}…`;
+      label.textContent = `Rendering ${i + 1}/${list.length}…`;
       const url = await renderFrame(list[i].text, W, H, false);
       zip.file(`${String(i + 1).padStart(pad, "0")}_${slug(list[i].text)}.png`, url.split(",")[1], {
         base64: true,
       });
     }
-    label.textContent = "Compression…";
+    label.textContent = "Compressing…";
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `brat-lyrics_${list.length}-phrases.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
-    status.textContent = `✓ ${list.length} images exportées.`;
+    status.textContent = `✓ ${list.length} images exported.`;
   } catch (e) {
-    status.textContent = "Erreur : " + (e as Error).message;
+    status.textContent = "Error: " + (e as Error).message;
   } finally {
     overlay.remove();
     btn.disabled = false;
   }
 }
 
-// ---------- Onglets ----------
+// ---------- Tabs ----------
 function bindTabs() {
   document.querySelectorAll(".tab-btn").forEach((b) =>
     b.addEventListener("click", () => {
@@ -886,7 +886,7 @@ function bindTabs() {
   );
 }
 
-// ---------- Init ----------
+// ---------- Initialization ----------
 input.addEventListener("input", () => {
   currentText = input.value;
   if (slides[activeSlide]) slides[activeSlide].text = currentText;
@@ -902,14 +902,14 @@ $("#btn-preview-seq").addEventListener("click", previewSteps);
   $(id).addEventListener("change", () => updateHint())
 );
 
-// --- Sync vidéo ---
+// --- Video sync ---
 $("#sync-audio-file").addEventListener("change", (e) => {
   const f = (e.target as HTMLInputElement).files?.[0];
   if (f) audioEl.src = URL.createObjectURL(f);
 });
 $("#sync-granularity").addEventListener("change", () => {
   ($("#sync-unit-label")).textContent =
-    ($("#sync-granularity") as HTMLSelectElement).value === "line" ? "ligne" : "mot";
+    ($("#sync-granularity") as HTMLSelectElement).value === "line" ? "line" : "word";
   buildTokens();
 });
 $("#btn-tap").addEventListener("click", tap);
@@ -917,11 +917,11 @@ $("#btn-tap-undo").addEventListener("click", undoTap);
 $("#btn-tap-reset").addEventListener("click", resetTaps);
 $("#btn-export-video").addEventListener("click", exportVideo);
 
-// --- Pellicule ---
+// --- Filmstrip ---
 $("#film-add").addEventListener("click", addSlide);
 $("#film-export").addEventListener("click", exportAllSlides);
 
-// Espace = tap quand l'onglet Sync est actif (hors saisie de texte)
+// Space = tap when Sync tab is active (outside text input)
 window.addEventListener("keydown", (e) => {
   if (e.code !== "Space") return;
   if (document.activeElement === input) return;
@@ -935,7 +935,7 @@ bindTabs();
 bindControls();
 syncValueLabels();
 
-// Démarrage : recharger le deck sauvegardé, sinon une phrase d'exemple
+// Startup: reload saved deck, otherwise example phrase
 try {
   const saved = JSON.parse(localStorage.getItem(SLIDES_KEY) || "null");
   if (saved && Array.isArray(saved.slides) && saved.slides.length) {
@@ -948,7 +948,7 @@ try {
 if (!slides.length) slides = [{ text: "there is something about those lyrics" }];
 selectSlide(activeSlide);
 
-// textFit dépend des métriques de la police : re-render une fois la woff chargée
+// textFit depends on font metrics: re-render once woff is loaded
 if (document.fonts && document.fonts.ready) {
   const reflow = () => {
     render();
